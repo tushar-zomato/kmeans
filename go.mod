@@ -1,4 +1,4 @@
-module github.com/muesli/kmeans
+module github.com/tushar-zomato/kmeans
 
 go 1.12
 
