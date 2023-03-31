@@ -4,7 +4,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/muesli/clusters"
+	"github.com/tushar-zomato/clusters"
 )
 
 const (
@@ -32,10 +32,13 @@ func TestPartitioningError(t *testing.T) {
 	}
 
 	d = clusters.Observations{
-		clusters.Coordinates{
-			0.1,
-			0.1,
-		},
+		clusters.NewObservation(
+			clusters.Coordinates{
+				0.1,
+				0.1,
+			},
+			1,
+		),
 	}
 	if _, err := km.Partition(d, 0); err == nil {
 		t.Errorf("Expected error partitioning with 0 clusters, got nil")
@@ -52,10 +55,13 @@ func TestDimensions(t *testing.T) {
 	var d clusters.Observations
 	for x := 0; x < 255; x += 32 {
 		for y := 0; y < 255; y += 32 {
-			d = append(d, clusters.Coordinates{
-				float64(x) / 255.0,
-				float64(y) / 255.0,
-			})
+			d = append(d, clusters.NewObservation(
+				clusters.Coordinates{
+					float64(x) / 255.0,
+					float64(y) / 255.0,
+				},
+				1,
+			))
 		}
 	}
 
@@ -77,10 +83,13 @@ func benchmarkPartition(size, partitions int, b *testing.B) {
 	var d clusters.Observations
 
 	for i := 0; i < size; i++ {
-		d = append(d, clusters.Coordinates{
-			rand.Float64(),
-			rand.Float64(),
-		})
+		d = append(d, clusters.NewObservation(
+			clusters.Coordinates{
+				rand.Float64(),
+				rand.Float64(),
+			},
+			1,
+		))
 	}
 
 	for j := 0; j < b.N; j++ {

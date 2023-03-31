@@ -27,7 +27,7 @@ to the cluster with the nearest mean, serving as a prototype of the cluster.
 ```go
 import (
 	"github.com/muesli/kmeans"
-	"github.com/muesli/clusters"
+	"github.com/tushar-zomato/clusters"
 )
 
 // set up a random two-dimensional data set (float64 values between 0.0 and 1.0)

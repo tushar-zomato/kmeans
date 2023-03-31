@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/muesli/clusters"
-
+	"github.com/tushar-zomato/clusters"
 	"github.com/wcharczuk/go-chart/v2"
 	"github.com/wcharczuk/go-chart/v2/drawing"
 )
