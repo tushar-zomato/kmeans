@@ -11,29 +11,25 @@ import (
 
 // Kmeans configuration/option struct
 type Kmeans struct {
-	// when a plotter is set, Plot gets called after each iteration
-	plotter Plotter
 	// deltaThreshold (in percent between 0.0 and 0.1) aborts processing if
 	// less than n% of data points shifted clusters in the last iteration
 	deltaThreshold float64
 	// iterationThreshold aborts processing when the specified amount of
 	// algorithm iterations was reached
 	iterationThreshold int
-}
-
-// The Plotter interface lets you implement your own plotters
-type Plotter interface {
-	Plot(cc clusters.Clusters, iteration int) error
+	// kmeanspp switches to initializing clusters based on distance between
+	// them instead of randomly, aka kmeans++
+	kmeanspp bool
 }
 
 // NewWithOptions returns a Kmeans configuration struct with custom settings
-func NewWithOptions(deltaThreshold float64, plotter Plotter) (Kmeans, error) {
+func NewWithOptions(deltaThreshold float64, kmeanspp bool) (Kmeans, error) {
 	if deltaThreshold <= 0.0 || deltaThreshold >= 1.0 {
 		return Kmeans{}, fmt.Errorf("threshold is out of bounds (must be >0.0 and <1.0, in percent)")
 	}
 
 	return Kmeans{
-		plotter:            plotter,
+		kmeanspp:           kmeanspp,
 		deltaThreshold:     deltaThreshold,
 		iterationThreshold: 96,
 	}, nil
@@ -41,7 +37,7 @@ func NewWithOptions(deltaThreshold float64, plotter Plotter) (Kmeans, error) {
 
 // New returns a Kmeans configuration struct with default settings
 func New() Kmeans {
-	m, _ := NewWithOptions(0.01, nil)
+	m, _ := NewWithOptions(0.01, false)
 	return m
 }
 
@@ -52,7 +48,17 @@ func (m Kmeans) Partition(dataset clusters.Observations, k int) (clusters.Cluste
 		return clusters.Clusters{}, fmt.Errorf("the size of the data set must at least equal k")
 	}
 
-	cc, err := clusters.New(k, dataset)
+	var (
+		cc  clusters.Clusters
+		err error
+	)
+
+	if !m.kmeanspp {
+		cc, err = clusters.New(k, dataset)
+	} else {
+		cc, err = clusters.NewFarApart(k, dataset)
+	}
+
 	if err != nil {
 		return cc, err
 	}
@@ -100,12 +106,7 @@ func (m Kmeans) Partition(dataset clusters.Observations, k int) (clusters.Cluste
 		if changes > 0 {
 			cc.Recenter()
 		}
-		if m.plotter != nil {
-			err := m.plotter.Plot(cc, i)
-			if err != nil {
-				return nil, fmt.Errorf("failed to plot chart: %s", err)
-			}
-		}
+
 		if i == m.iterationThreshold ||
 			changes < int(float64(len(dataset))*m.deltaThreshold) {
 			// fmt.Println("Aborting:", changes, int(float64(len(dataset))*m.TerminationThreshold))

@@ -5,8 +5,8 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/muesli/kmeans"
 	"github.com/tushar-zomato/clusters"
+	"github.com/tushar-zomato/kmeans"
 )
 
 func main() {
@@ -15,10 +15,10 @@ func main() {
 	// set up a random two-dimensional data set (float64 values between 0.0 and 1.0)
 	var d clusters.Observations
 	for x := 0; x < 1024; x++ {
-		d = append(d, clusters.Coordinates{
+		d = append(d, clusters.NewObservation(clusters.Coordinates{
 			rand.Float64(),
 			rand.Float64(),
-		})
+		}, 1))
 	}
 	fmt.Printf("%d data points\n", len(d))
 
